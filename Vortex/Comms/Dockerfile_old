@@ -1,0 +1,35 @@
+FROM base_debian:latest
+LABEL maintainer="damuth.nicholas2@navy.mil"
+ADD VERSION .
+ENV RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+ENV RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+
+EXPOSE 3010-3020
+
+ARG GO_VERSION=1.14.2
+ENV GOROOT=/usr/local/go
+ENV GOPATH=$HOME/Go
+ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+COPY assets/ /tmp/
+
+# GOLANG
+RUN cd /tmp && \
+    mkdir $HOME/Go && \
+    tar -xvf go$GO_VERSION.linux-amd64.tar.gz && \
+    rm go$GO_VERSION.linux-amd64.tar.gz && \
+    mv go /usr/local
+
+RUN wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key && \
+    apt-key add mosquitto-repo.gpg.key && \
+    apt-get install -y mosquitto
+
+RUN chmod 700 /tmp/*.sh && \
+    dos2unix /tmp/*.sh && \
+    cp -r /tmp/src /opt/src
+
+RUN rabbitmq-plugins enable rabbitmq_web_mqtt
+
+COPY assets/mosquitto.conf /etc/mosquitto/mosquitto.conf
+
+CMD [ "/tmp/entrypoint.sh"]

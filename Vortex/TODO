@@ -1,0 +1,10 @@
+- Auto Create Buckets for Nifi Registry
+- Secure Nifi to Registry with SSL
+- Auto Create / Load Reporting Tasks & Registry Clients in Nifi
+- Finish Testing for Atlas
+- Reconnect Telegraf to Kafka & Influx
+- Reconnect Geth & BDNS
+- Rebuold services to use BDNS for Domain Name Resolutions
+- Begin work on DataPlane
+- Investigate IOException for zookeeper
+- Investigate InvalidReceivedException for kafka

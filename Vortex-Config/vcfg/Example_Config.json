@@ -1,0 +1,10 @@
+
+{
+
+    "nifi": {
+        "image_location": "/home/cody/niwc/nifi-jre11/nifi-docker/dockerhub",  
+        "template_location": "/home/cody/test/test",
+        "template_destination": "/home/cody/test/test2"
+        }
+    
+}

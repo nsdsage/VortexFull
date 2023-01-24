@@ -1,0 +1,358 @@
+version: '3'
+services:
+# Zookeeper
+  zookeeper:
+    hostname: 'docker.io/bitnami/zookeeper:3-debian-10'
+    image: 'bitnami/zookeeper:latest'
+    container_name: zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - vortex_network
+    ports:
+      - '2181:${ZOOKEEPER_PORT}'
+# TIMEKEEPING
+#  time:
+#    build: .
+#    image: cturra/ntp:latest
+#    container_name: ${PROFILE_NAME}_ntp
+#    restart: always
+#    ports:
+#      - 123:123/udp
+#    read_only: true
+#    tmpfs:
+#      - /etc/chrony:rw,mode=1750
+#      - /run/chrony:rw,mode=1750
+#      - /var/lib/chrony:rw,mode=1750
+#    environment:
+#      - NTP_SERVERS=time1.google.com
+#    networks:
+#      - vortex_network
+
+# DATA INGEST - ETL / NIFI
+  nifi:
+    build:
+      context: ./Nifi 
+    image: nifi:vortex_${PROFILE_NAME}
+    container_name: nifi
+    user: root
+    privileged: true
+    ports:
+      - 10000:10000
+      - 8080:${NIFI_PORT}
+      - 7000-7100:${NIFI_PORTS_RANGE}
+    environment:
+      - NIFI_WEB_HTTP_PORT=${NIFI_PORT}
+      - NIFI_CLUSTER_IS_NODE=false
+      - NIFI_CLUSTER_NODE_PROTOCOL_PORT=8082
+      - NIFI_ZK_CONNECT_STRING=zookeeper:${ZOOKEEPER_PORT}
+      - NIFI_ELECTION_MAX_WAIT=1 sec
+      - NIFI_SENSITIVE_PROPS_KEY=pUaEVgyGKT61fMCAWNbjJPMwAcQDuDj4
+    depends_on: 
+      - zookeeper
+    networks:
+      - vortex_network
+#    volumes:
+      # - ./Nifi/configs/authorizers.xml:/opt/nifi/nifi-current/conf/authorizers.xml
+      # - ./Nifi/configs/nifi.properties:/opt/nifi/nifi-current/conf/nifi.properties
+#      - templates:/tmp/templates
+#      - nifidata:/opt/nifi/nifi-current/conf
+      # - /opt/tools:Nifi/external/nettools/:ro
+      # - /usr/bin/nmap:/usr/bin/nmap:ro
+  nifireg:
+    image: apache/nifi-registry:latest
+    container_name: nifireg
+    ports:
+      - "18080:${NIFI_REG_PORT}"
+    environment:
+      - LOG_LEVEL=INFO
+      - NIFI_REGISTRY_DB_DIR=/opt/nifi-registry/database
+      - NIFI_REGISTRY_FLOW_PROVIDER=file
+      - NIFI_REGISTRY_FLOW_STORAGE_DIR=/opt/nifi-registry/flow_storage
+      - NIFI_SENSITIVE_PROPS_KEY=1234567890abcdef
+    networks:
+      - vortex_network
+# DATA TAGGING / CLASSIFICATION
+  atlas:
+    build:
+      context: ./Atlas
+    image: atlas:vortex_${PROFILE_NAME}
+    container_name: atlas
+    ports:
+      - 21000:${ATLAS_PORT}
+    networks:
+      - vortex_network
+# PUBSUB COMMS - AMQP
+  comms:
+    build:
+      context: ./Comms
+    image: comms:${PROFILE_NAME}
+    container_name: comms
+    networks:
+      - vortex_network
+    environment:
+      - MONGODB_DATABASE=${DB}
+      - MONGODB_USERNAME=${DB_USER}
+      - MONGODB_PASSWORD=${DB_PASSWORD}
+      - RABBITMQ_USERNAME=${MQ_ADMIN_USER}
+      - RABBITMQ_PASSWORD=${MQ_ADMIN_PASSWORD}
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/tmp/definitions.json"
+    ports:
+      - 3010-3016:3010-3016
+      - 3020:80
+      - 15672:15672
+      - 3017:5672
+      - 3018:15675
+      - 3019:1883
+# DATA COMMUNICATIONS - KAFKA
+  kafka:
+    image: 'confluentinc/cp-enterprise-kafka:5.1.2'
+    container_name: kafka
+    ports:
+      - '9092:${KAFKA_PORT_1}'
+      - '9991:${KAFKA_PORT_2}'
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:${ZOOKEEPER_PORT}"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT_1},PLAINTEXT_HOST://localhost:29092
+      KAFKA_BROKER_ID: 1
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_SCHEMA_REGISTRY_URL: "schemaregistry:${KAFKA_SCHEMA_REG_PORT}"
+      KAFKA_JMX_PORT: ${KAFKA_PORT_2}
+    depends_on:
+      - zookeeper
+    networks:
+      - vortex_network
+  schemaregistry:
+    image: confluentinc/cp-schema-registry:5.1.2
+    container_name: schema
+    depends_on:
+      - zookeeper
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper:${ZOOKEEPER_PORT}"
+      SCHEMA_REGISTRY_HOST_NAME: schemaregistry
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:${KAFKA_SCHEMA_REG_PORT}"
+    ports:
+      - 8085:${KAFKA_SCHEMA_REG_PORT}
+    networks:
+      - vortex_network
+# # DATA BRIDGE -- TELEGRAPH 
+#   telegraf:
+#     build:
+#       context: ./Telegraf 
+#     image: telegraf:vortex_${PROFILE_NAME}
+#     container_name: ${PROFILE_NAME}_telegraf
+#     command: -config /etc/telegraf/telegraf.conf -config-directory /etc/telegraf/telegraf.d
+#     depends_on: 
+#       - influx
+#       - nifi
+#     ports:
+#       - 8092:${TELEGRAF_PORT_1}
+#       - 8125:${TELEGRAF_PORT_2}
+#       - 8094:${TELEGRAF_PORT_3}
+#     environment:
+#       HOST_PROC: /rootfs/proc
+#       HOST_SYS: /rootfs/sys
+#       HOST_ETC: /rootfs/etc
+#       INFLUX_ORG: 'demo.net'
+#       INFLUX_HOST: 'http://influx:${INFLUX_PORT_1}'
+#     volumes:
+#       - ./Telegraf/assets/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+#       - ./Telegraf/assets/telegraf.d/:/etc/telegraf/telegraf.d/:ro
+#       - /var/run/docker.sock:/var/run/docker.sock:ro
+#       - /sys:/rootfs/sys:ro
+#       - /proc:/rootfs/proc:ro
+#       - /etc:/rootfs/etc:ro
+#       # - templates:/etc/telegraf/telegraf.d/
+#     networks:
+#       - vortex_network
+# # DATA INTEGRITY - BLOCKCHAIN
+  geth:
+    build:
+      context: ./Geth
+      args:
+        - GETH_PASSWORD=${GETH_PASSWORD}
+    image: geth:vortex_${PROFILE_NAME}
+    container_name: geth
+    # restart: on-failure
+    hostname: geth
+    environment: 
+      - ethstatsSecret=${ETHSTATSSECRET}
+    ports:
+      - "7545:${GETH_PORT_1}"
+      # - "30303:30303"
+      - "30304:${GETH_PORT_2}"
+      - "30303:${GETH_PORT_3}/udp"
+      - "8545:${GETH_PORT_4}"
+      - "8546:${GETH_PORT_5}"
+      - "8000:${GETH_PORT_6}"
+    # command: '--datadir=~/.ethereum/devchain --nodekeyhex=091bd6067cb4612df85d9c1ff85cc47f259ced4d4cd99816b14f35650f59c322 --rpcapi "db,personal,eth,net,web3" --rpccorsdomain="*" --networkid=456719 --rpc --rpcaddr="0.0.0.0"'
+    volumes:
+      - contracts:/tmp/geth/
+    networks:
+      - vortex_network
+      - blockchain
+# # DATA INTEGRITY - SMART CONTRACTS
+#   contracts:
+#     tty: true
+#     build:
+#       context: ./Contracts
+#     image: contracts:vortex_${PROFILE_NAME}
+#     container_name: ${PROFILE_NAME}_contracts
+#     volumes:
+#       - contracts:/tmp/geth/
+#     # depends_on: 
+#     #   - geth
+#     #   - artifactory
+#     networks:
+#       - vortex_network
+#       - blockchain
+#   bdns:
+#     tty: true
+#     build:
+#       context: ./Bdns
+#     image: bdns:vortex_${PROFILE_NAME}
+#     container_name: ${PROFILE_NAME}_bdns
+#     networks:
+#       - vortex_network
+#       - blockchain
+#     ports:
+#       - "1234:1234"
+#       - "854:853"
+#       - "54:53"
+# # DATA INTEGRITY - DASHBOARD
+#   gethstats:
+#     tty: true
+#     image: ethereumex/eth-netstats:latest
+#     container_name: ${PROFILE_NAME}_gethstats
+#     ports:
+#       - 30305:3000
+#     environment:
+#       - WS_SECRET=${ETHSTATSSECRET}
+#     volumes:
+#       - /etc/localtime:/etc/localtime:ro
+#     networks:
+#       - vortex_network
+#       - blockchain
+#     depends_on:
+#       - geth
+# # DATAPLANE - GOLANG / GRaphQL
+#   dataplane:
+#     build:
+#       context: ./DataPlane
+#     image: dataplane:vortex_${PROFILE_NAME}
+#     container_name: ${PROFILE_NAME}_dataplane
+#     ports:
+#       - 4000:${DATAPLANE_PORT}
+#     networks:
+#       - vortex_network
+#       - blockchain      
+#     volumes:
+#       - contracts:/tmp/geth/
+# # DATABASE - INFLUX
+# # Primarily used for Internal Monitoring, and testing as a baseline. Dataplane is expected to be provided in a higher level project
+# # That includes Vortex and provides a DataPlane option. This is merely to be the bare minimum.
+  influx:
+    image: quay.io/influxdb/influxdb:v2.0.8
+    container_name: influx
+    ports:
+      - 8086:${INFLUX_PORT_1}
+      - 8088:${INFLUX_PORT_2}
+    environment:
+      - INFLUX_ORG=${PROFILE_NAME}
+      - INFLUXDB_DB=${DB}
+      - INFLUXDB_USER=${DB_USER}
+      - INFLUXDB_USER_PASSWORD=${DB_PASSWORD}
+      - INFLUXDB_ADMIN_ENABLED=true
+      - INFLUXDB_ADMIN_USER_PASSWORD=${ADMIN}
+      - INFLUXDB_ADMIN_USER_TOKEN=${ADMIN_TOKEN}
+      - INFLUXDB_HTTP_AUTH_ENABLED=true
+    volumes:
+      - ./Influx/assets/influxdb.conf:/root/.influxdbv2/configs:ro
+    networks:
+      - vortex_network
+  influxdb_cli:
+    build:
+      context: ./Influx
+    image: influxdb_cli:vortex_${PROFILE_NAME}
+    container_name: influxdb_cli
+    restart: on-failure:12
+    depends_on:
+      - influx
+    links:
+      - influx
+    networks:
+      - vortex_network
+# # DATA VISUALIZATION - GRAFANA
+  grafana:
+    build:   
+      context: ./Grafana
+    image: grafana:vortex_${PROFILE_NAME}
+    container_name: grafana
+    ports:
+#      - "3030:${GRAFANA_PORT}"
+      - "3030:3000"
+    networks:
+      - vortex_network
+    environment: 
+      - DISABLE_JEMALLOC=true
+# # PROMETHEUS
+#   prom:
+#     user: root
+#     build:
+#       context: ./Prometheus
+#     image: prom:vortex_${PROFILE_NAME}
+#     container_name: ${PROFILE_NAME}_prom
+#     volumes:
+#       - ./Prometheus/Assets:/prometheus
+#       - ./Prometheus/Assets/data/prometheus:/data
+#     command:
+#       - '--config.file=/prometheus/prometheus.yml'
+#     ports:
+#       - "9090:${PROMETHEUS_PORT}"
+#     networks:
+#       - vortex_network
+#   # jenkins:
+#   #   build:
+#   #     context: ./Jenkins
+#   #   image: jenkins:vortex_${PROFILE_NAME}
+#   #   container_name: ${PROFILE_NAME}_jenkins
+#   #   restart: always 
+#   #   networks:
+#   #     - vortex_network
+#   #   links:
+#   #     - artifactory
+#   #   user: root
+#   #   ports:
+#   #     - "8883:8080"
+#   #     - "8443:8443"
+#   #     - "50000:50000"
+#   #   # volumes:
+#   #   #   - './Jenkins/volumes/:/var/jenkins_home'
+#   #   #   - './Jenkins/volumes/:/home'
+#   #   #   - './Jenkins/volumes/:/var/run/docker.sock'
+# # Artifact storage and delivery
+#   # artifactory:
+#   #   build:
+#   #     context: ./Artifactory
+#   #   image: artifactory:latest
+#   #   container_name: ${PROFILE_NAME}_artifactory
+#   #   restart: always 
+#   #   networks:
+#   #     - vortex_network
+#   #     - blockchain
+#   #   user: root
+#   #   ports:
+#   #     - "8884:8081"
+# # NETWORK
+networks:
+  vortex_network:
+    name: vortex_network
+    external: true
+  blockchain:
+    driver: bridge
+volumes:
+  templates:
+  contracts:
+  nifidata:

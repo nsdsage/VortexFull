@@ -1,0 +1,54 @@
+{
+    "OmnIotHubPacket" : {
+      "OriginDeviceId" : 555,
+      "PacketGeneratedTimestamp" : "2021-06-16T23:12:21.273656Z",
+      "SequenceNumber" : 0,
+      "PacketType" : "Raw BLE",
+      "PacketContents" : {
+        "SensorType" : "Matrix PowerWatch 2",
+        "SensorMacAddress" : "06:05:04:EE:5C:F5",
+        "PacketDataField" : [ {
+          "FieldName" : "Current Total Steps",
+          "FieldValue" : 1243
+        }, {
+          "FieldName" : "Current Walking Steps",
+          "FieldValue" : 1243
+        }, {
+          "FieldName" : "Current Running Steps",
+          "FieldValue" : 0
+        }, {
+          "FieldName" : "Current Total Calories kcal",
+          "FieldValue" : 1288013
+        }, {
+          "FieldName" : "Current BMR Calories kcal",
+          "FieldValue" : 1020521
+        }, {
+          "FieldName" : "Current Active Calories kcal",
+          "FieldValue" : 267492
+        }, {
+          "FieldName" : "Current Sleep Minutes",
+          "FieldValue" : 0
+        }, {
+          "FieldName" : "Current Distance Meters",
+          "FieldValue" : 971
+        }, {
+          "FieldName" : "Current Solar microWh",
+          "FieldValue" : 196
+        }, {
+          "FieldName" : "Current Thermal microWh",
+          "FieldValue" : 21
+        }, {
+          "FieldName" : "Current Skin Temp Celsius",
+          "FieldValue" : 30.25,
+          "FieldValueHex" : "0000F241"
+        }, {
+          "FieldName" : "Current Case Temp Celsius",
+          "FieldValue" : 29.5,
+          "FieldValueHex" : "0000EC41"
+        }, {
+          "FieldName" : "Current Battery Percent",
+          "FieldValue" : 75
+        } ]
+      }
+    }
+  }

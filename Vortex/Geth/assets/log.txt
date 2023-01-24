@@ -1,0 +1,52 @@
+ndpt_geth       | INFO [09-13|16:27:00.730] Maximum peer count                       ETH=25 LES=0 total=25
+ndpt_geth       | WARN [09-13|16:27:00.730] The flag --rpcapi is deprecated and will be removed June 2021, please use --http.api 
+ndpt_geth       | INFO [09-13|16:27:00.730] Smartcard socket not found, disabling    err="stat /run/pcscd/pcscd.comm: no such file or directory"
+ndpt_geth       | WARN [09-13|16:27:00.731] ------------------------------------------------------------------- 
+ndpt_geth       | WARN [09-13|16:27:00.731] Referring to accounts by order in the keystore folder is dangerous! 
+ndpt_geth       | WARN [09-13|16:27:00.731] This functionality is deprecated and will be removed in the future! 
+ndpt_geth       | WARN [09-13|16:27:00.731] Please use explicit addresses! (can search via `geth account list`) 
+ndpt_geth       | WARN [09-13|16:27:00.731] ------------------------------------------------------------------- 
+ndpt_geth       | INFO [09-13|16:27:00.731] Set global gas cap                       cap=50,000,000
+ndpt_geth       | WARN [09-13|16:27:00.731] Sanitizing invalid miner gas price       provided=0 updated=0
+ndpt_geth       | INFO [09-13|16:27:00.731] Allocated trie memory caches             clean=154.00MiB dirty=256.00MiB
+ndpt_geth       | INFO [09-13|16:27:00.731] Allocated cache and file handles         database=/root/Vortex/geth/chaindata cache=512.00MiB handles=524,288
+ndpt_geth       | INFO [09-13|16:27:00.798] Opened ancient database                  database=/root/Vortex/geth/chaindata/ancient readonly=false
+ndpt_geth       | INFO [09-13|16:27:00.799] Initialised chain configuration          config="{ChainID: 1 Homestead: 1150000 DAO: 1920000 DAOSupport: true EIP150: 2463000 EIP155: 2675000 EIP158: 2675000 Byzantium: 4370000 Constantinople: 7280000 Petersburg: 7280000 Istanbul: 9069000, Muir Glacier: 9200000, Berlin: 12244000, London: 12965000, Engine: ethash}"
+ndpt_geth       | INFO [09-13|16:27:00.799] Disk storage enabled for ethash caches   dir=/root/Vortex/geth/ethash count=3
+ndpt_geth       | INFO [09-13|16:27:00.799] Disk storage enabled for ethash DAGs     dir=/root/.ethash            count=2
+ndpt_geth       | INFO [09-13|16:27:00.799] Initialising Ethereum protocol           network=999 dbversion=8
+ndpt_geth       | INFO [09-13|16:27:00.807] Loaded most recent local header          number=0 hash=d4e567..cb8fa3 td=17,179,869,184 age=52y5mo1w
+ndpt_geth       | INFO [09-13|16:27:00.807] Loaded most recent local full block      number=0 hash=d4e567..cb8fa3 td=17,179,869,184 age=52y5mo1w
+ndpt_geth       | INFO [09-13|16:27:00.807] Loaded most recent local fast block      number=0 hash=d4e567..cb8fa3 td=17,179,869,184 age=52y5mo1w
+ndpt_geth       | INFO [09-13|16:27:00.807] Loaded local transaction journal         transactions=0 dropped=0
+ndpt_geth       | INFO [09-13|16:27:00.807] Regenerated local transaction journal    transactions=0 accounts=0
+ndpt_geth       | INFO [09-13|16:27:00.807] Gasprice oracle is ignoring threshold set threshold=2
+ndpt_geth       | INFO [09-13|16:27:00.808] Starting peer-to-peer node               instance=Geth/v1.10.7-unstable-0730acc5-20210728/linux-amd64/go1.16.6
+ndpt_geth       | INFO [09-13|16:27:00.815] New local node record                    seq=2 id=3af434ced5f0e9f2 ip=127.0.0.1 udp=30303 tcp=30303
+ndpt_geth       | INFO [09-13|16:27:00.815] Started P2P networking                   self=enode://4294c394ab7c7e5be090813109b5ef7f7a50b6aec8d00808f1fea12521f47e63d52581a9df5f65bf1f61c21ba231bd02bae03666d714bc753b407895265b5af3@127.0.0.1:30303
+ndpt_geth       | ERROR[09-13|16:27:00.816] Unavailable modules in HTTP API list     unavailable=[clique] available="[admin debug web3 eth txpool personal ethash miner net]"
+ndpt_geth       | ERROR[09-13|16:27:00.816] Unavailable modules in HTTP API list     unavailable=[clique] available="[admin debug web3 eth txpool personal ethash miner net]"
+ndpt_geth       | INFO [09-13|16:27:00.816] WebSocket enabled                        url=ws://[::]:8545
+ndpt_geth       | INFO [09-13|16:27:00.816] HTTP server started                      endpoint=[::]:8545 prefix= cors=* vhosts=localhost
+ndpt_geth       | INFO [09-13|16:27:01.657] Unlocked account                         address=0xcfb5C45c5Bf5b6d848BCcA91D4458Ae33daD4536
+ndpt_geth       | INFO [09-13|16:27:01.657] Transaction pool price threshold updated price=0
+ndpt_geth       | INFO [09-13|16:27:01.657] Updated mining threads                   threads=0
+ndpt_geth       | INFO [09-13|16:27:01.657] Transaction pool price threshold updated price=0
+ndpt_geth       | INFO [09-13|16:27:01.657] Commit new mining work                   number=1 sealhash=f8c95c..0c87cf uncles=0 txs=0 gas=0 fees=0 elapsed="174.702µs"
+ndpt_geth       | Welcome to the Geth JavaScript console!
+ndpt_geth       | 
+ndpt_geth       | instance: Geth/v1.10.7-unstable-0730acc5-20210728/linux-amd64/go1.16.6
+ndpt_geth       | coinbase: 0xcfb5c45c5bf5b6d848bcca91d4458ae33dad4536
+ndpt_geth       | at block: 0 (Wed Dec 31 1969 16:00:00 GMT-0800 (PST))
+ndpt_geth       |  datadir: /root/Vortex
+ndpt_geth       |  modules: admin:1.0 debug:1.0 eth:1.0 ethash:1.0 miner:1.0 net:1.0 personal:1.0 rpc:1.0 txpool:1.0 web3:1.0
+ndpt_geth       | 
+ndpt_geth       | To exit, press ctrl-d
+ndpt_geth       | > 
+ndpt_geth       | INFO [09-13|16:27:01.702] HTTP server stopped                      endpoint=[::]:8545
+ndpt_geth       | INFO [09-13|16:27:01.818] Ethereum protocol stopped 
+ndpt_geth       | INFO [09-13|16:27:01.819] Transaction pool stopped 
+ndpt_geth       | INFO [09-13|16:27:01.819] Writing snapshot state to disk           root=d7f897..0f0544
+ndpt_geth       | INFO [09-13|16:27:01.819] Persisted trie from memory database      nodes=0 size=0.00B time="8.853µs" gcnodes=0 gcsize=0.00B gctime=0s livenodes=1 livesize=0.00B
+ndpt_geth       | INFO [09-13|16:27:01.819] Writing clean trie cache to disk         path=/root/Vortex/geth/triecache threads=12
+ndpt_geth       | INFO [09-13|16:27:01.830] Persisted the clean trie cache           path=/root/Vortex/geth/triecache elapsed=10.983ms

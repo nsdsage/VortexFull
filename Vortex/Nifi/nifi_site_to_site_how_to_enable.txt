@@ -1,0 +1,14 @@
+To enable site to site 
+exec into nifi container @ /etc
+edit hosts file to 
+make sure container address routes to correct ip address 
+
+example hosts file:
+127.0.0.1       localhost
+::1     localhost ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+192.168.112.9   7f9f780f74f9
+192.168.1.17 32e1af8802b1 ############ ip mapping
